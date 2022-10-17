@@ -31,12 +31,12 @@ const split = <T>(step: number, targetArr: T[]) => {
   };
 };
 
-export default function useHistoryTravel<T>(initialValue?: T) {
-  const [history, setHistory] = useState<IData<T | undefined>>({
+export default function useHistoryTravel<T>(initialValue?: T, maxSize: number = 0) {
+  const [history, setHistory] = useState<IData<T | undefined>>(() => ({
     present: initialValue,
     past: [],
     future: [],
-  });
+  }));
 
   const { present, past, future } = history;
 
@@ -54,10 +54,18 @@ export default function useHistoryTravel<T>(initialValue?: T) {
   };
 
   const updateValue = (val: T) => {
+    const _past = [...past, present];
+    const maxSizeNum = isNumber(maxSize) ? maxSize : Number(maxSize);
+    // maximum number of records exceeded
+    if (maxSizeNum > 0 && _past.length > maxSizeNum) {
+      //delete first
+      _past.splice(0, 1);
+    }
+
     setHistory({
       present: val,
       future: [],
-      past: [...past, present],
+      past: _past,
     });
   };
 
